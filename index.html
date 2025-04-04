@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <title>Portfolio | Design Apple</title>
     <style>
         * {
@@ -30,6 +31,18 @@
             overflow-x: hidden;
         }
 
+        body.overlay-active::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 999; /* Sopra il contenuto ma sotto la sezione laterale */
+            pointer-events: none;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -38,42 +51,12 @@
 
         /* Navigation */
         nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 20px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            transition: background-color 0.3s ease;
+            display: none; /* Nascondi la navigation bar */
         }
 
-        nav.scrolled {
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-        }
-
-        .nav-links a {
-            color: var(--text-color);
-            text-decoration: none;
-            font-size: 16px;
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-color);
+        /* Modifica il padding-top delle sezioni per compensare la rimozione della navbar */
+        .hero {
+            padding-top: 0;
         }
 
         /* Hero Section */
@@ -648,26 +631,58 @@
         /* Section Indicator */
         .section-indicator {
             position: fixed;
-            right: 30px;
+            right: -50px; /* Nascondi inizialmente */
             top: 50%;
             transform: translateY(-50%);
             z-index: 100;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            transition: right 0.3s ease;
         }
         
+        body.show-indicators .section-indicator {
+            right: 30px; /* Mostra i puntini */
+        }
+
         .indicator-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
             background-color: #555;
             transition: transform 0.3s ease, background-color 0.3s ease;
+            position: relative; /* Necessario per il tooltip */
         }
         
         .indicator-dot.active {
             background-color: var(--accent-color);
             transform: scale(1.5);
+        }
+
+        .indicator-dot:hover {
+            transform: scale(1.8);
+            background-color: var(--accent-color);
+        }
+
+        .indicator-dot:hover::after {
+            content: attr(data-section-name); /* Mostra il nome della sezione */
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            border-radius: 5px;
+            white-space: nowrap;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .indicator-dot:hover::after {
+            opacity: 1; /* Mostra il tooltip al passaggio del mouse */
         }
 
         /* Popup Modal */
@@ -681,18 +696,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 2000;
-        }
-
-        .popup.hidden {
-            display: none;
-        }
-
-        .popup-content {
-            background-color: #1d1d1f;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 800px;
             width: 90%;
             text-align: center;
         }
@@ -744,29 +747,21 @@
             background-color: var(--accent-color);
             transform: scale(1.2);
         }
+
+        /* Aggiunto stile per la classe hidden */
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-    <nav id="navbar">
-        <div class="container">
-            <div class="logo">Portfolio</div>
-            <div class="nav-links">
-                <a href="#hero">Home</a>
-                <a href="#about">Chi Sono</a>
-                <a href="#projects">Progetti</a>
-                <a href="#skills">Competenze</a>
-                <a href="#contact">Contatti</a>
-            </div>
-        </div>
-    </nav>
-    
     <!-- Section Indicator -->
     <div class="section-indicator">
-        <div class="indicator-dot" data-section="hero"></div>
-        <div class="indicator-dot" data-section="about"></div>
-        <div class="indicator-dot" data-section="projects"></div>
-        <div class="indicator-dot" data-section="skills"></div>
-        <div class="indicator-dot" data-section="contact"></div>
+        <div class="indicator-dot" data-section="hero" data-section-name="Home"></div>
+        <div class="indicator-dot" data-section="about" data-section-name="Chi Sono"></div>
+        <div class="indicator-dot" data-section="projects" data-section-name="Progetti"></div>
+        <div class="indicator-dot" data-section="skills" data-section-name="Competenze"></div>
+        <div class="indicator-dot" data-section="contact" data-section-name="Contatti"></div>
     </div>
 
     <section id="hero" class="hero">
@@ -835,7 +830,7 @@
     <!-- Popup Modal -->
     <div id="project-popup" class="popup hidden">
         <div class="popup-content">
-            <span class="popup-close">&times;</span>
+            <span class="popup-close"><i class="fas fa-times"></i></span>
             <div class="popup-slideshow">
                 <img src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0" alt="Progetto 1 - Slide 1" class="popup-slide">
                 <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308" alt="Progetto 1 - Slide 2" class="popup-slide hidden">
@@ -917,9 +912,11 @@
                     <h3>Parliamo del tuo progetto</h3>
                     <p>Hai un'idea innovativa? Contattami per trasformarla in realtà con un design elegante e funzionale.</p>
                     <a href="mailto:info@example.com" class="contact-link">
+                        <i class="far fa-envelope"></i>
                         <span>info@example.com</span>
                     </a>
                     <a href="tel:+393331234567" class="contact-link">
+                        <i class="fas fa-phone"></i>
                         <span>+39 333 123 4567</span>
                     </a>
                 </div>
@@ -948,10 +945,10 @@
         <div class="container">
             <div class="footer-content">
                 <div class="social-links">
-                    <a href="#" class="social-link">FB</a>
-                    <a href="#" class="social-link">IG</a>
-                    <a href="#" class="social-link">LI</a>
-                    <a href="#" class="social-link">GH</a>
+                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-github"></i></a>
                 </div>
                 <p class="copyright">© 2025 Portfolio. Tutti i diritti riservati.</p>
             </div>
@@ -1019,13 +1016,13 @@
                     if (entry.isIntersecting) {
                         entry.target.classList.add('in-view');
                     } else {
-                        entry.target.classList.remove('in-view'); // Rimuove la classe quando non è visibile
+                        entry.target.classList.remove('in-view');
                     }
                 });
             }, { threshold: 0.2 });
             
             sections.forEach(section => {
-                observer.observe(section);
+                if (section) observer.observe(section); // Aggiunto controllo per evitare errori
             });
         }
         
@@ -1104,6 +1101,7 @@
 
             function showSlide(index) {
                 slides.forEach((slide, i) => {
+                    slide.src = projectData[currentSlide + 1].images[i]; // Corretto caricamento immagini
                     slide.classList.toggle('hidden', i !== index);
                 });
                 dots.forEach((dot, i) => {
@@ -1157,6 +1155,24 @@
                     showSlide(index);
                     startSlideshow();
                 });
+            });
+        });
+
+        // Show section indicators on mouse near edge
+        document.addEventListener('DOMContentLoaded', () => {
+            let isMouseNearEdge = false; // Flag per evitare toggle continuo
+
+            // Mostra i puntini quando il mouse si avvicina al bordo destro
+            document.addEventListener('mousemove', (e) => {
+                const nearEdge = e.clientX > window.innerWidth - 50;
+
+                if (nearEdge && !isMouseNearEdge) {
+                    document.body.classList.add('show-indicators');
+                    isMouseNearEdge = true;
+                } else if (!nearEdge && isMouseNearEdge) {
+                    document.body.classList.remove('show-indicators');
+                    isMouseNearEdge = false;
+                }
             });
         });
 
